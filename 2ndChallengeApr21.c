@@ -28,10 +28,10 @@ enum mode {
 	object,
 	leaveObject
 };
-mode Mode = object;
+mode Mode = wander;
 
 task objectDetect () {
-	while(true) {
+	while(true && Mode != leaveObject) {
 		// Read the sensor
 		currentDistance = SensorValue[Sonar] /2.54;
 		displayCenteredBigTextLine(8, "Dist: %f.2 in", currentDistance);
@@ -46,7 +46,16 @@ task objectDetect () {
 			Mode = wander;
 		}
 	}
+}
 
+task lineDetect () {
+	while(true) {
+		if (Mode == wander) {
+		//look for a line
+		} else if (Mode == line) {
+		//follow a line
+		}
+	}
 }
 
 task main()
@@ -98,7 +107,7 @@ task main()
 			// We're too far away, ignore
 			if ((currentDistance) <= detectObjectFarThreshold && currentDistance > detectObjectLowThreshold)
 			{
-				
+
 				float speedRatio = (currentDistance) / detectObjectFarThreshold;
 				displayCenteredBigTextLine(4, "speRat %f.2", speedRatio);
 				float currentSpeed = speedRatio * objectDetectMaxSpeed;
@@ -118,7 +127,20 @@ task main()
 			} else if (Mode == wander) {
 
 			} else if (Mode == leaveObject) {
-
+			//backup
+			motor[MotorL] = -20;
+			motor[MotorR] = -20;
+			sleep(2000);
+			//turn around
+			motor[MotorL] = 20;
+			motor[MotorR] = -20;
+			sleep(2000);
+			//pause
+			motor[MotorL] = 0;
+			motor[MotorR] = 0;
+			sleep(2000);
+			Mode=wander;
+			startTask(objectDetect);
 		}
 
 	} //end while true
